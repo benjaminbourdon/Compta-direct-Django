@@ -1,0 +1,25 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    <title>Importer des données</title>
+{% endblock%}
+
+{% block content %}
+    <form enctype="multipart/form-data" method="post" action="" class="block-form">
+        {% csrf_token %}
+        <h2 class="form__header">Importer des données</h2>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <div class="form__body">
+            {{ form.as_div }}
+        </div>
+        <div class="form__footer">
+            <input type="submit" value="Envoyer">
+        </div>
+    </form>
+{% endblock %}
