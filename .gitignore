@@ -1,1 +1,4 @@
 .vscode
+dev-files
+__pycache__
+db*
