@@ -1,0 +1,114 @@
+/* Base */
+
+html{
+    box-sizing: border-box;
+    /* overflow-x: hidden; */
+}
+
+*, *::before, *::after{
+    box-sizing: inherit;
+}
+
+body {
+    margin : 0px ; 
+    padding-bottom: 30px;
+    min-width: 550px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+/* En-tête */
+
+.body__header {
+    padding: 5px;
+    border : black 2px solid;
+    width : 100%;
+    margin-bottom: 60px;;
+}
+
+.body__header h1 {
+    text-align: center;
+    margin: 15px;
+    top: 0px;
+}
+
+.body__header nav {
+    margin : 15px;
+}
+
+.body__header ul {
+    text-align: center;
+    list-style: none;
+    padding: 0px 10px;
+    margin: 0px;
+}
+
+.body__header li {
+    display: inline-block;
+    vertical-align: center;
+    margin: 0px 5px;
+}
+
+
+/* Corps */
+
+main {
+    width: 60%;
+    margin : auto ;
+}
+
+main h2 {
+    text-align: center;
+}
+
+.link-button {
+    display: inline-block;
+    border: black 2px solid;
+    border-radius: 6px;
+    padding: 3px 7px;
+    text-align: center;
+    font-size: inherit ;
+    background-color: white;
+    font-size: medium;
+    vertical-align: bottom;
+}
+
+/* Formulaires */
+
+.messages {
+    color : darkred ;
+    list-style: none ;
+    padding: 0px;
+    margin: 5px;
+}
+
+.block-form {
+    border: black 2px solid;
+}
+
+.form__header {
+    border-bottom: black 2px solid;
+    padding: 0px 20px;
+}
+
+.form__footer {
+    text-align: right;
+    padding: 20px;
+}
+
+.form__body {
+    width: 90%;
+    margin: 0px auto ;
+}
+
+.form__body>div {
+    margin: 20px 0px;
+}
+
+.form__body input[type="text"], .form__body input[type="password"], .form__body textarea {
+    width: 100%;
+}
