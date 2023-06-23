@@ -11,15 +11,16 @@ from django.utils.translation import gettext_lazy as _
 class ImportFileForm(forms.Form):
     class CategoryFile(models.TextChoices):
         MEMBER_LIST = "Members", _("List of members")
-        OPERATIONS_LIST = "Operations", _("List of operations")
+        TRANSACTION_LIST = "Transactions", _("List of transactions")
+        BALANCES_LIST = "Balances", _("List of initial and current balances")
 
     file = forms.FileField(
         label=_("file to import"),
         required=True,
         allow_empty_file=False,
         widget=forms.FileInput,
-        validators=[FileExtensionValidator(["csv"])],
-        help_text=_("File must be CSV text type."),
+        validators=[FileExtensionValidator(["csv", "json"])],
+        help_text=_("File extension must be CSV or JSON."),
     )
     category = forms.ChoiceField(label=_("file category"), choices=CategoryFile.choices)
 
@@ -35,9 +36,9 @@ class ImportFileForm(forms.Form):
                 raise ValidationError(_("File must be encode with UTF-8."))
             else:
                 cleaned_data["file"] = decoded_file
-                read_csv = csv.DictReader(io.StringIO(decoded_file))
 
                 if cleaned_data["category"] == ImportFileForm.CategoryFile.MEMBER_LIST:
+                    read_csv = csv.DictReader(io.StringIO(decoded_file))
                     if "Email" not in read_csv.fieldnames:
                         raise ValidationError(
                             _('CSV file doesn\'t have an "Email" colomn.')
