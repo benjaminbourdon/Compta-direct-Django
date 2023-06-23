@@ -111,7 +111,46 @@ class ProfileAC(models.Model):
     idContact = models.PositiveIntegerField(
         _("contact identifier"), unique=True, null=True, blank=True, default=None
     )
+    initial_amount = models.DecimalField(
+        _("initial balance"),
+        max_digits=7,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    current_amount = models.DecimalField(
+        _("initial balance"),
+        max_digits=7,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
     member_revo = models.BooleanField(_("revolution'air membership"), default=False)
     member_CS = models.BooleanField(_("Championnet Sports membership"), default=False)
     detail_url = models.URLField(_("detail url"), blank=True)
     last_check = models.DateField(_("last check"), default=date.today)
+
+
+class Transaction(models.Model):
+    entity_id = models.PositiveIntegerField(primary_key=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="transactions",
+    )
+    idDocument = models.PositiveIntegerField(_("document identifier"), unique=False)
+    provided_title = models.CharField(_("provided title"), max_length=300)
+    amount = models.DecimalField(
+        _("amount"),
+        max_digits=7,
+        decimal_places=2,
+        help_text=_(
+            "Transaction amount, from the considered individual perspective."
+            "So, a negative amount is a debt owned by an individuel to the club,"
+            " or a paiement from the club.  "
+        ),
+    )
+    date_event = models.DateField(_("date of the transaction"))
+    last_update = models.DateTimeField(_("last check"), auto_now=True)
+    imported_date = models.DateTimeField(_("date of first import"), auto_now_add=True)
+    is_deleted = models.BooleanField(_("state of deletion"), default=False)

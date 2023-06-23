@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from suivi_operations.models import ProfileAC, User
+from suivi_operations.models import ProfileAC, User, Transaction
 
 # Inspired by
 # https://docs.djangoproject.com/en/4.2/topics/auth/customizing/
@@ -116,5 +116,11 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
+class TransactionAdmin(admin.ModelAdmin):
+    model = Transaction
+    list_display = ["date_event", "provided_title", "user", "date_event"]
+
+
 admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
+admin.site.register(Transaction, TransactionAdmin)
