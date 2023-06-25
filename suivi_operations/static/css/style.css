@@ -112,3 +112,14 @@ main h2 {
 .form__body input[type="text"], .form__body input[type="password"], .form__body textarea {
     width: 100%;
 }
+
+/* Table */
+table {
+    margin: auto;
+}
+
+table, th , td {
+    border: solid black 1px;
+    border-collapse: collapse;
+    padding: 3px;
+}

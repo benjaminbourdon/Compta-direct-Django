@@ -1,0 +1,48 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    <title>Liste des utilisateurs</title>
+{% endblock%}
+
+{% block content %}
+    <form enctype="multipart/form-data" method="post" action="" class="block-form">
+        {% csrf_token %}
+        <h2 class="form__header">Lister les utilisateurs</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Courriel</th>
+                    <th>Montant actuel importé</th>
+                    <th>Montant actuel calculé</th>
+                    <th>Différence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in user_list %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.profile_ac.current_amount != None %}
+                            {{ user.profile_ac.current_amount }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ user.calculated_amount|floatformat:2 }}
+                    </td>
+                    <td>
+                        {{ user.diff_amount|floatformat:2}}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <th>
+                        Pas d'utilisateurs
+                    </th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    </form>
+{% endblock %}

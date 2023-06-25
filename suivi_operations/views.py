@@ -6,9 +6,11 @@ from datetime import datetime
 from decimal import Decimal
 
 from django.db import transaction
+from django.db.models import Sum, F
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.edit import FormView
+from django.views.generic.list import ListView
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
@@ -157,3 +159,18 @@ class ImportFileView(SuccessMessageMixin, FormView):
                     line.get("Solde à la date T (EUR)")
                 )
                 user.save()
+
+
+class UserListView(ListView):
+    model = User
+    # paginate_by = 100
+
+    def get_queryset(self):
+        queryset = User.objects.prefetch_related("profile_ac")
+        queryset = queryset.filter(profile_ac__current_amount__isnull=False)
+        queryset = queryset.annotate(
+            calculated_amount=Sum("transactions__amount", default=0)
+            + F("profile_ac__initial_amount"),
+            diff_amount=F("profile_ac__current_amount") - F("calculated_amount"),
+        )
+        return queryset
