@@ -119,7 +119,7 @@ class ProfileAC(models.Model):
         blank=True,
     )
     current_amount = models.DecimalField(
-        _("initial balance"),
+        _("current balance"),
         max_digits=7,
         decimal_places=2,
         null=True,

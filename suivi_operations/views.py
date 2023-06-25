@@ -95,7 +95,7 @@ class ImportFileView(SuccessMessageMixin, FormView):
 
     @staticmethod
     def _amount_to_decimal(amount):
-        return Decimal(amount.replace(",", ".").replace("\u202f", ""))
+        return round(Decimal(amount.replace(",", ".").replace("\u202f", "")), 2)
 
     def _import_transactions_from_json(self, json_file):
         list = json.loads(json_file)
@@ -136,4 +136,24 @@ class ImportFileView(SuccessMessageMixin, FormView):
         return count_new_transactions
 
     def _import_initial_current_amount_from_csv(self, file):
-        pass
+        dictreader = csv.DictReader(io.StringIO(file))
+
+        for line in dictreader:
+            user_id = line.get("ID")
+            if user_id in (
+                "7993922",
+                "8384240",
+                "8845003",
+                "8716849",
+            ):
+                continue
+
+            if user_id and user_id.isdigit():
+                user = User.objects.get(profile_ac__idContact=line["ID"])
+                user.profile_ac.initial_amount = (-1) * self._amount_to_decimal(
+                    line.get("Solde en début de période (EUR)")
+                )
+                user.profile_ac.current_amount = (-1) * self._amount_to_decimal(
+                    line.get("Solde à la date T (EUR)")
+                )
+                user.save()
