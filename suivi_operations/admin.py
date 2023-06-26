@@ -20,7 +20,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ["email"]
+        fields = ["email", "is_active"]
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -62,6 +62,13 @@ class ProfilAcInline(admin.StackedInline):
     verbose_name_plural = _("AssoConnect profiles")
 
 
+class TransactionInline(admin.TabularInline):
+    model = Transaction
+    extra = 0
+    classes = ["collapse"]
+    can_delete = False
+
+
 class UserAdmin(BaseUserAdmin):
     list_display = [
         "email",
@@ -75,7 +82,7 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ["is_active", "is_staff"]
     search_fields = ["email"]
     filter_horizontal = []
-    inlines = [ProfilAcInline]
+    inlines = [ProfilAcInline, TransactionInline]
 
     form = UserChangeForm
     fieldsets = (
@@ -110,7 +117,7 @@ class UserAdmin(BaseUserAdmin):
             None,
             {
                 "classes": ["wide"],
-                "fields": ("email", "password1", "password2"),
+                "fields": ("email", "password1", "password2", "is_active"),
             },
         ),
     )
