@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Sum, F
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import gettext_lazy as _
@@ -13,14 +13,16 @@ from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.core.mail import EmailMessage
+from django.template.loader import get_template
 
-from .forms import ImportFileForm
+from .forms import ImportFileForm, SelectDebtUserForm
 from .models import User, Transaction
 
 
 class ImportFileView(SuccessMessageMixin, FormView):
     form_class = ImportFileForm
-    template_name = "importfile.html"
+    template_name = "suivi_operations/importfile.html"
     success_url = "#"
     success_message = _("Imported successfully")
 
@@ -64,11 +66,12 @@ class ImportFileView(SuccessMessageMixin, FormView):
                     "first_name": line.get("Prénom"),
                     "last_name": line.get("Nom"),
                     "gender": gender,
-                    "phone_number": line.get("Téléphone mobile")
-                    or line.get("Téléphone mobile"),
-                    "date_of_birth": datetime.strptime(
-                        line["Date de naissance"], "%d/%m/%Y"
-                    )
+                    "phone_number": phone_number
+                    if (phone_number := line.get("Téléphone mobile")) != "0"
+                    else line.get("Téléphone mobile"),
+                    "date_of_birth": datetime.strptime(date_birth, "%m/%d/%Y")
+                    if (date_birth := line["Date de naissance"]) != "0"
+                    else None
                     if line.get("Date de naissance")
                     else None,
                 }
@@ -91,7 +94,10 @@ class ImportFileView(SuccessMessageMixin, FormView):
                 user.profile_ac.detail_url = line.get("Détail")
                 user.profile_ac.last_check = datetime.today()
 
-                user.save()
+                try:
+                    user.save()
+                except IntegrityError:
+                    pass
 
         return count_new_members
 
@@ -99,7 +105,10 @@ class ImportFileView(SuccessMessageMixin, FormView):
     def _amount_to_decimal(amount):
         return round(Decimal(amount.replace(",", ".").replace("\u202f", "")), 2)
 
+    @transaction.atomic
     def _import_transactions_from_json(self, json_file):
+        Transaction.objects.all().delete()
+
         list = json.loads(json_file)
         count_new_transactions = 0
 
@@ -119,10 +128,19 @@ class ImportFileView(SuccessMessageMixin, FormView):
             else:
                 amount = None
 
+            user_name = transaction_data["user_id"].split(" - ")[-1]
+            user_name_parts = user_name.split(" ")
+            try:
+                user = User.objects.get(
+                    first_name__startswith=user_name_parts[0],
+                    last_name__endswith=user_name_parts[-1],
+                )
+            except User.DoesNotExist:
+                print(user_name)
+                continue
+
             transaction_values = {
-                "user": User.objects.get(
-                    profile_ac__idContact=transaction_data["user_id"]
-                ),
+                "user": user,
                 "idDocument": transaction_data["Id pièce"],
                 "provided_title": transaction_data["Intitulé"],
                 "amount": amount,
@@ -147,6 +165,7 @@ class ImportFileView(SuccessMessageMixin, FormView):
                 "8384240",
                 "8845003",
                 "8716849",
+                "9114357",
             ):
                 continue
 
@@ -174,3 +193,38 @@ class UserListView(ListView):
             diff_amount=F("profile_ac__current_amount") - F("calculated_amount"),
         )
         return queryset
+
+
+class SendDebtMailView(SuccessMessageMixin, FormView):
+    form_class = SelectDebtUserForm
+    template_name = "suivi_operations/selectdebtuser.html"
+    success_url = "#"
+    success_message = _("Send successfully")
+
+    def form_valid(self, form):
+        selected_users = form.cleaned_data["users"]
+        # if isinstance(selected_users, User):
+        #     selected_users = [selected_users]
+
+        for user in selected_users:
+            template = get_template("suivi_operations/emails/debt_message.html")
+            html_content = template.render(
+                {
+                    "user": user,
+                    "date_check": datetime.today(),
+                }
+            )
+            html_content = re.sub(r"\s*\n\s*", " ", html_content).strip()
+
+            email = EmailMessage(
+                subject="[important] Revolution'air - Dette à payer",
+                from_email="admin@revos.fr",
+                to=[user.email],
+                body=html_content,
+                reply_to=["tresorier@revos.fr"],
+            )
+            email.send()
+            print(user.email)
+            # print(html_content)
+
+        return super().form_valid(form)

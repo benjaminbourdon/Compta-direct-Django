@@ -128,6 +128,12 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ["date_event", "provided_title", "user", "date_event"]
 
 
+class ProfileACAdmin(admin.ModelAdmin):
+    model = ProfileAC
+    list_display = ["idContact"]
+
+
 admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
 admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(ProfileAC, ProfileACAdmin)

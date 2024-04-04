@@ -154,3 +154,27 @@ class Transaction(models.Model):
     last_update = models.DateTimeField(_("last check"), auto_now=True)
     imported_date = models.DateTimeField(_("date of first import"), auto_now_add=True)
     is_deleted = models.BooleanField(_("state of deletion"), default=False)
+
+    @property
+    def verbose_title(self):
+        if self.amount > 0:
+            if "paiement" in self.provided_title or "Paiement" in self.provided_title:
+                return "Paiement recu par le club"
+        if " - Transaction #" in self.provided_title:
+            return self.provided_title.partition(" - Transaction #")[0]
+        return self.provided_title
+
+
+class Reminder(models.Model):
+    datetime = models.DateTimeField(default="")
+    subject = models.CharField(max_length=300)
+    # type = models.TextChoices()
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reminders",
+    )
+    balance = models.DecimalField(
+        max_digits=7,
+        decimal_places=2,
+    )

@@ -7,6 +7,8 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from .models import User
+
 
 class ImportFileForm(forms.Form):
     class CategoryFile(models.TextChoices):
@@ -44,3 +46,10 @@ class ImportFileForm(forms.Form):
                             _('CSV file doesn\'t have an "Email" colomn.')
                         )
         return cleaned_data
+
+
+class SelectDebtUserForm(forms.Form):
+    debt_user_queryset = User.objects.prefetch_related("profile_ac")
+    debt_user_queryset = debt_user_queryset.filter(profile_ac__current_amount__lt=0)
+
+    users = forms.ModelMultipleChoiceField(queryset=debt_user_queryset)

@@ -123,4 +123,17 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Default user model for authentification
+
 AUTH_USER_MODEL = "suivi_operations.User"
+
+# Email settings
+# https://docs.djangoproject.com/en/4.2/topics/email/
+
+EMAIL_HOST = "smtp-relay.sendinblue.com"
+EMAIL_PORT = "587"
+
+EMAIL_HOST_USER = "user@mail.com"
+EMAIL_HOST_PASSWORD = "pAssWord"
+
+EMAIL_USE_TLS = True

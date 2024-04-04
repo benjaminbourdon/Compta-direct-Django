@@ -1,0 +1,50 @@
+{% spaceless %}
+<p style="color:gray;">Remarque : ce message est envoyé depuis une adresse générique, ne pas répondre.</p>
+<p>Bonjour {{user.firstname|default:""}},</p>
+<p>Nous revenons vers toi afin de te permettre de régler les sommes que tu dois au club.
+    Ton solde actuel est de {{user.profile_ac.current_amount|floatformat:2}}€ au {{date_check|date:"SHORT_DATE_FORMAT"}}.</p>
+<p>Afin d'équilibrer tes comptes, nous te demandons d'effectuer un virement de la somme exacte, 
+    idéalement sous 7 jours.</p>
+<p>Tu trouveras ci-dessous le détail de tes dettes et créances de la saison.
+    Je t'invite à revenir vers nous en cas de question : 
+    <a href="mailto:tresorier@example.fr">tresorier@revos.fr</a></p>
+<p>Remarque : l'enregistrement des opérations comptables est en cours de vérification. 
+    Un paiement récent pourrait par exemple ne pas apparaître.
+    De facon générale, merci de nous contacter s'il vous semble qu'une opération manque.</p>
+
+<table style="border:solid 1px black;padding:4px;">
+    <caption>Récapitulatif des dettes et créances{% if user.get_full_name %} de {{user.get_full_name}}{% if user.profile_ac.idContact %} ({{user.profile_ac.idContact}}){% endif %}{% endif %} au {{date_check|date:"SHORT_DATE_FORMAT"}}</caption>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Intitulé</th>
+            <th>Montant</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if user.profile_ac.initial_amount %}
+            <tr>
+                <td>01/07/2022</td>
+                <td>Solde précédant</td>
+                <td>{{user.profile_ac.initial_amount}}€</td>
+            </tr>
+            {% endif %}
+            {% for transaction in user.transactions.all %}
+            <tr>
+                <th>{{transaction.date_event|date:"SHORT_DATE_FORMAT"}}</th>
+                <th>{{transaction.verbose_title}}</th>
+                <th>{{transaction.amount|floatformat:2}}€</th>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>{{date_check|date:"SHORT_DATE_FORMAT"}}</th>
+                <th>Solde actuel</th>
+                <th>{{user.profile_ac.current_amount|floatformat:2}}€</th>
+            </tr>
+        </tfoot>
+    </table>
+    {% endspaceless %}
+    
+    
